@@ -97,18 +97,20 @@ def is_excluded(data):
 
 provinces = pd.read_excel('./province.xlsx')
 input_files = os.listdir('./input')
+land_output = open(f'./output/land_output.csv', 'w')
+ns3a_output = open(f'./output/ns3_output.csv', 'w')
+land_output.write(';'.join(land_column_names))
+land_output.write('\n')
+ns3a_output.write(';'.join(ns3a_column_names))
+ns3a_output.write('\n')
+
 for file in input_files:
     lands = pd.read_excel(f'./input/{file}')
     deeds = lands[lands['Type of Land right'] == 79]
     deeds = pd.merge(deeds, provinces, on='Province')[['Title Deed No..1', 'หน้าสำรวจ', 'Code']]
-
-    filename = file.split('.')[0]
-    land_output = open(f'./output/{filename}_land_output.csv', 'w')
     
     print(f'Processing {file}')
     print('Get Land data')
-    land_output.write(';'.join(land_column_names))
-    land_output.write('\n')
     for i in deeds.index:
         try:
             land_no, survey_no, province_no = deeds.loc[i, 'Title Deed No..1'], int(deeds.loc[i, 'หน้าสำรวจ']), deeds.loc[i, 'Code']
@@ -121,11 +123,8 @@ for file in input_files:
             
     ns3as = lands[lands['Type of Land right'] == 81]
     ns3as = pd.merge(ns3as, provinces, on='Province')[['Title Deed No..1', 'เลขที่ดิน', 'Code']]
-    ns3a_output = open(f'./output/{filename}_ns3_output.csv', 'w')
     
     print('Get NS3A data')
-    ns3a_output.write(';'.join(ns3a_column_names))
-    ns3a_output.write('\n')
     for i in ns3as.index:
         try:
             ns3a_no, rawang_no, province_no = ns3as.loc[i, 'Title Deed No..1'], int(ns3as.loc[i, 'เลขที่ดิน']), ns3as.loc[i, 'Code']
