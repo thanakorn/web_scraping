@@ -105,6 +105,7 @@ ns3a_output.write(';'.join(ns3a_column_names))
 ns3a_output.write('\n')
 
 for file in input_files:
+    if not file.endswith('.xlsx'): continue
     lands = pd.read_excel(f'./input/{file}')
     deeds = lands[lands['Type of Land right'] == 79]
     deeds = pd.merge(deeds, provinces, on='Province')[['Title Deed No..1', 'หน้าสำรวจ', 'Code']]
