@@ -33,7 +33,7 @@ class DataParser(HTMLParser):
         if not data.startswith('<!--') and len(data) > 0 and data not in excluded:
             self.output += ';' + str(data.strip())
 
-def get_land_data(land_no, survey_no, province_no):
+def get_land_data(land_no, province_no):
     # Extract Land Id
     land_request_data = {
                             'chanode_no': land_no,
@@ -67,7 +67,7 @@ def get_land_data(land_no, survey_no, province_no):
     
     
 
-def get_ns3_data(ns3a_no, rawang_no, province_no):
+def get_ns3_data(ns3a_no, province_no):
     # Extract NS3A Id
     ns3a_request_data = {
                             'ns3a_no': ns3a_no,
@@ -116,15 +116,16 @@ ns3a_output.write('\n')
 for file in input_files:
     if not file.endswith('.xlsx'): continue
     lands = pd.read_excel(f'./input/{file}')
-    deeds = lands[lands['Type of Land right'] == 79]
-    deeds = pd.merge(deeds, provinces, on='Province')[['Title Deed No..1', 'หน้าสำรวจ', 'Code']]
+    deeds = lands[lands['Type'] == 79]
+    deeds = pd.merge(deeds, provinces, on='Province')
+    deeds = deeds[['Title Deed No.', 'Code']]
     
     print(f'Processing {file}')
     print('Get Land data')
     for i in deeds.index:
         try:
-            land_no, survey_no, province_no = deeds.loc[i, 'Title Deed No..1'], int(deeds.loc[i, 'หน้าสำรวจ']), deeds.loc[i, 'Code']
-            land_data = get_land_data(land_no, survey_no, province_no)
+            land_no, province_no = deeds.loc[i, 'Title Deed No.'], deeds.loc[i, 'Code']
+            land_data = get_land_data(land_no, province_no)
             for data in land_data:
                 land_output.write(';'.join(data))
                 land_output.write('\n')
@@ -132,14 +133,14 @@ for file in input_files:
         except:
             print(f'No data')
             
-    ns3as = lands[lands['Type of Land right'] == 81]
-    ns3as = pd.merge(ns3as, provinces, on='Province')[['Title Deed No..1', 'เลขที่ดิน', 'Code']]
+    ns3as = lands[lands['Type'] == 81]
+    ns3as = pd.merge(ns3as, provinces, on='Province')[['Title Deed No.', 'Code']]
     
     print('Get NS3A data')
     for i in ns3as.index:
         try:
-            ns3a_no, rawang_no, province_no = ns3as.loc[i, 'Title Deed No..1'], int(ns3as.loc[i, 'เลขที่ดิน']), ns3as.loc[i, 'Code']
-            ns3a_data = get_ns3_data(ns3a_no, rawang_no, province_no)
+            ns3a_no, province_no = ns3as.loc[i, 'Title Deed No.'], ns3as.loc[i, 'Code']
+            ns3a_data = get_ns3_data(ns3a_no, province_no)
             for data in ns3a_data:
                 ns3a_output.write(';'.join(data))
                 ns3a_output.write('\n')
